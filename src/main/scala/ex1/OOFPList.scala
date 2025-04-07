@@ -49,10 +49,7 @@ enum List[A]:
 
   def length(): Int = this.foldLeft(0)((i, v) => i + 1)
 
-  def zipWithIndex: List[(A, Int)] = 
-    var length= this.length()
-    this.foldRight(Nil[(A,Int)]())((element, acc)=>(element, length)::acc)
-    //def foldRight[B](init: B)(op: (A, B) => B): B = this match
+  def zipWithIndex: List[(A, Int)] = this.foldRight(Nil[(A, Int)]())((element, acc) => (element, acc.length()) :: acc)
 
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
