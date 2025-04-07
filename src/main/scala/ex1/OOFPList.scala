@@ -45,7 +45,10 @@ enum List[A]:
     case h :: t => t.foldLeft(h)(op)
 
   // Exercise: implement the following methods
-  def zipWithValue[B](value: B): List[(A, B)] = ???
+  def zipWithValue[B](value: B): List[(A, B)] = this match
+    case Nil()=> Nil()
+    case h::t => (h,value) :: t.zipWithValue(value) //TODO: can this be done with a tail recursion?
+
   def length(): Int = ???
   def zipWithIndex: List[(A, Int)] = ???
   def partition(predicate: A => Boolean): (List[A], List[A]) = ???
