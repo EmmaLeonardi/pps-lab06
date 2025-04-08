@@ -40,6 +40,8 @@ enum List[A]:
 
   def map[B](fun: A => B): List[B] = flatMap(a => fun(a) :: Nil())
 
+  def reverse(): List[A] = this.foldLeft(Nil[A]())((acc, element) => element :: acc)
+
   def reduce(op: (A, A) => A): A = this match
     case Nil() => throw new IllegalStateException()
     case h :: t => t.foldLeft(h)(op)
@@ -51,8 +53,11 @@ enum List[A]:
 
   def zipWithIndex: List[(A, Int)] = this.foldRight((Nil[(A, Int)](), this.length() - 1))((element, acc) => ((element, acc._2) :: acc._1, acc._2 - 1))._1
 
-  def partition(predicate: A => Boolean): (List[A], List[A]) = this.foldRight((Nil[A](), Nil[A]()))((element, acc)=>if predicate(element) then (element::acc._1, acc._2) else (acc._1, element::acc._2))
-  def span(predicate: A => Boolean): (List[A], List[A]) = ???
+  def partition(predicate: A => Boolean): (List[A], List[A]) = this.foldRight((Nil[A](), Nil[A]()))((element, acc) => if predicate(element) then (element :: acc._1, acc._2) else (acc._1, element :: acc._2))
+
+  def span(predicate: A => Boolean): (List[A], List[A]) =
+    val result = this.foldLeft((Nil[A](), Nil[A](), true))((acc, element) => if acc._3 & predicate(element) then (element :: acc._1, acc._2, true) else (acc._1, element :: acc._2, false))
+    (result._1.reverse(), result._2.reverse())
   def takeRight(n: Int): List[A] = ???
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
@@ -74,6 +79,7 @@ object Test extends App:
   println(reference.length()) //4
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
   println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
+  println(reference.reverse()) //List(4,3,2,1)
   println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
   println(reference.span(_ < 3)) // (List(1, 2), List(3, 4))
   println(reference.reduce(_ + _)) // 10
