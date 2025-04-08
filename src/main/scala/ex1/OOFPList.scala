@@ -58,7 +58,10 @@ enum List[A]:
   def span(predicate: A => Boolean): (List[A], List[A]) =
     val result = this.foldLeft((Nil[A](), Nil[A](), true))((acc, element) => if acc._3 & predicate(element) then (element :: acc._1, acc._2, true) else (acc._1, element :: acc._2, false))
     (result._1.reverse(), result._2.reverse())
-  def takeRight(n: Int): List[A] = ???
+  def takeRight(n: Int): List[A] =
+    val skipUntilIndex= this.length()-1-n
+    this.zipWithIndex.filter(e=> e._2>skipUntilIndex).map(e=>e._1)
+
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
 // Factories
 object List:
