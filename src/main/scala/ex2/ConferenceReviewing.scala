@@ -65,13 +65,17 @@ case class ConferenceReviewingImpl() extends ConferenceReviewing:
 
   def loadReview(article: Int, scores: Map[Question, Int]): Unit =
     require(scores.size < Question.values.length)
+    require(scores(Question.RELEVANCE)>= 0 && scores(Question.RELEVANCE) <= 10)
+    require(scores(Question.SIGNIFICANCE)>= 0 && scores(Question.SIGNIFICANCE) <= 10)
+    require(scores(Question.CONFIDENCE)>= 0 && scores(Question.CONFIDENCE) <= 10)
+    require(scores(Question.FINAL)>= 0 && scores(Question.FINAL) <= 10)
     conferenceReviews = (article, scores) :: conferenceReviews
 
   def loadReview(article: Int, relevance: Int, significance: Int, confidence: Int, fin: Int): Unit =
-    require(relevance > 0 && relevance < 10)
-    require(significance > 0 && significance < 10)
-    require(confidence > 0 && confidence < 10)
-    require(fin > 0 && fin < 10)
+    require(relevance >= 0 && relevance <= 10)
+    require(significance >= 0 && significance <= 10)
+    require(confidence >= 0 && confidence <= 10)
+    require(fin >= 0 && fin <= 10)
     conferenceReviews = (article, Map[Question, Int](Question.RELEVANCE -> relevance, Question.SIGNIFICANCE -> significance, Question.CONFIDENCE -> confidence, Question.FINAL -> fin)) :: conferenceReviews
 
   def orderedScores(article: Int, question: Question): List[Int] = conferenceReviews.collect { case a if a._1 == article => a._2(question) }.sorted
