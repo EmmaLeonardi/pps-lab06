@@ -105,9 +105,39 @@ case class ConferenceReviewingImpl() extends ConferenceReviewing:
 
   override def toString: String = conferenceReviews.toString()
 
-@main def Main: Unit =
+@main def Main(): Unit =
   val confrev = ConferenceReviewing()
-  println(confrev) //0
+  val emptyConf = ConferenceReviewing()
+  //No articles
+  assert(confrev.toString == List().toString())
+  assert(emptyConf.toString == confrev.toString)
+  //Load articles
   confrev.loadReview(article = 1, relevance = 8, significance = 8, confidence = 6, fin = 8)
-  println(confrev) //1
-  //TODO: finish testing
+  val oneArticleLoaded = confrev.toString
+  assert(oneArticleLoaded != List().toString())
+  confrev.loadReview(article = 1, relevance = 2, significance = 2, confidence = 2, fin = 3)
+  val map = Map(RELEVANCE -> 9, SIGNIFICANCE -> 9, CONFIDENCE -> 10, FINAL -> 9)
+  confrev.loadReview(article = 2, map)
+  assert(oneArticleLoaded != confrev.toString)
+  //Ordered scores of articles
+  assert(confrev.orderedScores(1, FINAL) == List(3, 8))
+  assert(confrev.orderedScores(2, CONFIDENCE) == List(10))
+  assert(emptyConf.orderedScores(1, RELEVANCE) == List())
+  //Average final score
+  val expected1 = (8 + 3) / 2.0
+  val actual1 = confrev.averageFinalScore(1)
+  assert(expected1 - 0.1 <= actual1 || actual1 >= expected1 + 0.1)
+  val expected2 = 9.0
+  val actual2 = confrev.averageFinalScore(2)
+  assert(expected2 - 0.1 <= actual2 || actual2 >= expected2 + 0.1)
+  assert(emptyConf.averageFinalScore(1)==0)
+  //Accepted articles
+  assert(confrev.acceptedArticles()==Set(1,2))
+  assert(emptyConf.acceptedArticles()==Set())
+  //Sort accepted articles
+  assert(confrev.sortAcceptedArticles()==List((1,actual1), (2,actual2)))
+  assert(emptyConf.sortAcceptedArticles()==List())
+  //Average weighted final score map
+  assert(confrev.averageWeightedFinalScoreMap()!=Map()) //article 1: (4,8+0,6)/2->2,7 article 2->9
+  assert(emptyConf.averageWeightedFinalScoreMap()==Map())
+
