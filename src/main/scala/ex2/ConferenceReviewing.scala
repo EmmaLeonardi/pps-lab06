@@ -1,11 +1,13 @@
 package ex2
 
+import ex2.Question.*
+
 import scala.language.postfixOps
 
-trait ConferenceReviewing:
-  enum Question:
-    case RELEVANCE, SIGNIFICANCE, CONFIDENCE, FINAL
+enum Question:
+  case RELEVANCE, SIGNIFICANCE, CONFIDENCE, FINAL
 
+trait ConferenceReviewing:
   /**
    * @param article the number of the article
    * @param scores  the scores of the questions
@@ -64,7 +66,7 @@ case class ConferenceReviewingImpl() extends ConferenceReviewing:
   private var conferenceReviews = List[(Int, Map[Question, Int])]()
 
   def loadReview(article: Int, scores: Map[Question, Int]): Unit =
-    require(scores.size < Question.values.length)
+    require(scores.size == Question.values.length)
     require(scores(Question.RELEVANCE)>= 0 && scores(Question.RELEVANCE) <= 10)
     require(scores(Question.SIGNIFICANCE)>= 0 && scores(Question.SIGNIFICANCE) <= 10)
     require(scores(Question.CONFIDENCE)>= 0 && scores(Question.CONFIDENCE) <= 10)
@@ -82,7 +84,9 @@ case class ConferenceReviewingImpl() extends ConferenceReviewing:
 
   def averageFinalScore(article: Int): Double =
     val fin = conferenceReviews.collect { case a if a._1 == article => a._2(Question.FINAL) }
-    fin.sum / fin.length
+    if fin.isEmpty
+    then 0
+    else fin.sum * 1.0 / fin.length
 
   private def accepted(article: Int): Boolean =
     this.averageFinalScore(article) > 5 && conferenceReviews.collect { case a if a._1 == article => a._2 }.exists(a => a.contains(Question.RELEVANCE) && a(Question.RELEVANCE) >= 8)
@@ -92,15 +96,16 @@ case class ConferenceReviewingImpl() extends ConferenceReviewing:
   def sortAcceptedArticles(): List[(Int, Double)] = this.acceptedArticles().map(a => (a, this.averageFinalScore(a))).toList.sortBy(_._2)
 
   private def averageWeightedFinalScore(article: Int): Double =
-    val total = conferenceReviews.collect { case a if a._1 == article => a._2(Question.FINAL) * a._2(Question.CONFIDENCE) / 10 }
-    total.sum / total.length
+    val total = conferenceReviews.collect { case a if a._1 == article => a._2(Question.FINAL) * a._2(Question.CONFIDENCE) / 10.0 }
+    if total.isEmpty
+    then 0
+    else total.sum * 1.0 / total.length
 
   def averageWeightedFinalScoreMap(): Map[Int, Double] = conferenceReviews.map(a => a._1).distinct.map(a => (a, averageWeightedFinalScore(a))).toMap
 
   override def toString: String = conferenceReviews.toString()
 
 @main def Main: Unit =
-  //import ConferenceReviewing.
   val confrev = ConferenceReviewing()
   println(confrev) //0
   confrev.loadReview(article = 1, relevance = 8, significance = 8, confidence = 6, fin = 8)
